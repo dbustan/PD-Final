@@ -4,7 +4,12 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    // Start is called before the first frame update
+    public float moveSpeed = 5f;
+
+    public Rigidbody2D rb;
+    public Animator animator;
+
+    Vector2 movement;
     void Start()
     {
         
@@ -13,6 +18,13 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        movement.x = Input.GetAxisRaw("Horizontal");
+        movement.y = Input.GetAxisRaw("Vertical");
+        animator.SetFloat("Speed", movement.sqrMagnitude);
+    }
+
+    private void FixedUpdate() 
+    {
+        rb.MovePosition(rb.position + movement * moveSpeed *Time.fixedDeltaTime);
     }
 }
