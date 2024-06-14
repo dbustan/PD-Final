@@ -20,7 +20,9 @@ public class Player : MonoBehaviour
 
     public GameObject bulletPrefab;
 
-    public float bulletSpeed = 50000;
+    public float bulletSpeed = 10f;
+
+    [SerializeField] int health = 3;
 
 
 
@@ -49,26 +51,9 @@ public class Player : MonoBehaviour
             OSCHandler.Instance.SendMessageToClient("pd", "/unity/walking", 0);
         }
 
-        if (Input.GetKeyDown(KeyCode.X)){
+        if (Input.GetKeyDown(KeyCode.Space)){
             ShootBullet();
             OSCHandler.Instance.SendMessageToClient("pd", "/unity/gunshot", 1);
-        }
-
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            OSCHandler.Instance.SendMessageToClient("pd", "/unity/playMusic", 0);
-            OSCHandler.Instance.SendMessageToClient("pd", "/unity/walking", 0);
-            //If we are running in a standalone build of the game
-            #if UNITY_STANDALONE
-            //Quit the application
-            Application.Quit();
-            #endif
-
-            //If we are running in the editor
-            #if UNITY_EDITOR
-            //Stop playing the scene
-            UnityEditor.EditorApplication.isPlaying = false;
-            #endif
         }
 
     }
@@ -92,6 +77,24 @@ public class Player : MonoBehaviour
             Debug.Log("getting to right");
             bullet.GetComponent<Rigidbody2D>().velocity = bulletSpawnPos.right * bulletSpeed;
             
+        }
+        
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        GameObject other = collision.gameObject;
+        if (other.CompareTag("Enemy"))
+        {
+            Destroy(other);
+            OSCHandler.Instance.SendMessageToClient("pd", "/unity/deathSound", 1);
+
+            health--;
+            if(health <= 0)
+            {
+                OSCHandler.Instance.SendMessageToClient("pd", "/unity/walking", 0);
+                Destroy(gameObject);
+            }
         }
         
     }
